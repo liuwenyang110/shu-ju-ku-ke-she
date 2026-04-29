@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>明德大学学生信息管理平台</title>
+  <link rel="icon"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%231d74f5'/%3E%3Cpath d='M16 24 32 16l16 8-16 8-16-8Zm0 10 16 8 16-8' fill='none' stroke='white' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+
+  <link rel="stylesheet" href="./styles.css">
+</head>
+
+<body>
+  <section class="auth-screen" id="auth-screen">
+    <div class="auth-card">
+      <div class="auth-heading">
+        <span class="brand-badge">统一身份认证</span>
+        <h2>明德大学学生信息管理平台</h2>
+      </div>
+      <div class="role-grid">
+        <button class="role-card" id="auth-admin-button" type="button">
+          <strong>教务管理端</strong>
+        </button>
+        <div class="role-card student-role-card">
+          <strong>学生服务端</strong>
+          <label for="auth-student-select">学生账号</label>
+          <select id="auth-student-select">
+            <option value="">正在加载学生...</option>
+          </select>
+          <button class="btn btn-primary" id="auth-student-button" type="button">进入平台</button>
+        </div>
+      </div>
+    </div>
+  </section>
+  <div class="bg-noise"></div>
+  <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+  <div class="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <span class="brand-badge">Mingde University</span>
+        <h1>学生信息管理平台</h1>
+        <p id="session-summary">未登录</p>
+      </div>
+
+      <nav class="sidebar-nav" aria-label="主导航">
+        <div class="nav-group-title">工作台</div>
+        <div class="nav-list">
+          <button class="nav-item" data-page="student-home">
+            <span class="nav-icon" data-icon="file"></span>
+            <span class="nav-meta"><strong>学生门户</strong></span>
+          </button>
+          <button class="nav-item" data-page="dashboard">
+            <span class="nav-icon" data-icon="home"></span>
+            <span class="nav-meta"><strong>信息总览</strong></span>
+          </button>
+          <button class="nav-item active" data-page="students" aria-current="page">
+            <span class="nav-icon" data-icon="users"></span>
+            <span class="nav-meta"><strong>学籍档案</strong></span>
+          </button>
+          <button class="nav-item" data-page="courses">
+            <span class="nav-icon" data-icon="book"></span>
+            <span class="nav-meta"><strong>课程资源</strong></span>
+          </button>
+          <button class="nav-item" data-page="grades">
+            <span class="nav-icon" data-icon="bar"></span>
+            <span class="nav-meta"><strong>成绩登记</strong></span>
+          </button>
+        </div>
+
+        <div class="nav-group-title">质量分析</div>
+        <div class="nav-list">
+          <button class="nav-item" data-page="transcript">
+            <span class="nav-icon" data-icon="file"></span>
+            <span class="nav-meta"><strong>学业档案</strong></span>
+          </button>
+          <button class="nav-item" data-page="analysis">
+            <span class="nav-icon" data-icon="radar"></span>
+            <span class="nav-meta"><strong>课程质量</strong></span>
+          </button>
+          <button class="nav-item" data-page="gpa">
+            <span class="nav-icon" data-icon="star"></span>
+            <span class="nav-meta"><strong>GPA 排名</strong></span>
+          </button>
+        </div>
+
+        <div class="nav-group-title">系统管理</div>
+        <div class="nav-list">
+          <button class="nav-item" data-page="database">
+            <span class="nav-icon" data-icon="database"></span>
+            <span class="nav-meta"><strong>数据字典</strong></span>
+          </button>
+          <button class="nav-item" data-page="logs">
+            <span class="nav-icon" data-icon="log"></span>
+            <span class="nav-meta"><strong>操作审计</strong></span>
+          </button>
+        </div>
+      </nav>
+
+
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-title-row">
+          <button class="sidebar-toggle" id="sidebar-toggle" type="button" aria-controls="sidebar" aria-expanded="false">
+            <span class="nav-icon" data-icon="menu"></span>
+          </button>
+          <div class="topbar-title-block">
+            <span class="topbar-page-title" id="page-title">信息总览</span>
+            <span class="topbar-context">2025-2026 第二学期 · 教务处</span>
+          </div>
+          <div class="topbar-actions">
+            <span class="session-chip" id="session-chip">未登录</span>
+            <button class="btn" id="role-switch" type="button">切换身份</button>
+            <button class="theme-toggle toolbar-btn" id="theme-toggle" type="button">
+              <span class="nav-icon" id="theme-icon" data-icon="moon"></span>
+              <span id="theme-label">深色模式</span>
+            </button>
+          </div>
+        </div>
+        <div class="topbar-search-row" id="topbar-search-row">
+          <div class="search-wrap">
+            <div class="search-shell">
+              <span class="nav-icon search-icon" data-icon="search"></span>
+              <input id="global-search" type="text" placeholder="检索学生：姓名 / 学号 / 专业 / 学院" aria-label="学生档案检索">
+              <button class="search-submit" type="button">搜索</button>
+            </div>
+            <div class="search-results" id="search-results" role="listbox" aria-label="学生搜索结果"></div>
+          </div>
+        </div>
+      </header>
+
+      <section class="content">
+        <section class="page" id="page-student-home">
+          <div class="student-hero card">
+            <div>
+              <span class="brand-badge">学生服务端</span>
+              <h2 id="student-home-title">学生门户</h2>
+              <p id="student-home-subtitle"></p>
+            </div>
+            <div class="student-hero-meta" id="student-home-meta">未加载</div>
+          </div>
+
+          <div class="mini-grid">
+            <div class="card summary-card"><strong>已修课程</strong><span id="student-course-count">0</span><small>课程数</small></div>
+            <div class="card summary-card"><strong>获得学分</strong><span id="student-credits">0.0</span><small>累计</small></div>
+            <div class="card summary-card"><strong>加权 GPA</strong><span id="student-gpa">0.00</span><small>当前</small></div>
+          </div>
+
+          <div class="split-grid">
+            <div class="card chart-panel">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">学业趋势</div>
+                </div>
+              </div>
+              <div class="chart-box" id="chart-student-score"></div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">学籍信息</div>
+                </div>
+              </div>
+              <div class="student-profile-list" id="student-profile-list"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">课程成绩</div>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <caption class="sr-only">我的成绩单</caption>
+                <thead>
+                  <tr>
+                    <th class="cell-center">#</th>
+                    <th>课程代码</th>
+                    <th>课程名称</th>
+                    <th class="cell-center">学分</th>
+                    <th class="cell-center">分数</th>
+                    <th class="cell-center">绩点</th>
+                    <th class="cell-center">等级</th>
+                  </tr>
+                </thead>
+                <tbody id="student-transcript-body"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">课程质量参考</div>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <caption class="sr-only">课程成绩概览</caption>
+                <thead>
+                  <tr>
+                    <th class="cell-center">#</th>
+                    <th>课程代码</th>
+                    <th>课程名称</th>
+                    <th class="cell-center">平均分</th>
+                    <th class="cell-center">最高分</th>
+                    <th class="cell-center">最低分</th>
+                    <th class="cell-center">人数</th>
+                  </tr>
+                </thead>
+                <tbody id="student-course-overview-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="page" id="page-dashboard">
+          <div class="dashboard-top-grid">
+            <div class="card dashboard-section">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">教务工作台</div>
+                  <div class="card-subtitle">明德大学 · 2025-2026 第二学期</div>
+                </div>
+              </div>
+              <div class="notice-list">
+                <div class="notice-item">
+                  <strong>学籍档案</strong>
+                  <span>学生状态、学院专业、基础档案维护</span>
+                </div>
+                <div class="notice-item">
+                  <strong>成绩登记</strong>
+                  <span>成绩录入、绩点回写、变更审计</span>
+                </div>
+                <div class="notice-item">
+                  <strong>质量监测</strong>
+                  <span>课程均分、通过率、GPA 排名</span>
+                </div>
+              </div>
+            </div>
+            <div class="card dashboard-section">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">学期运行</div>
+                  <div class="card-subtitle">教务数据状态</div>
+                </div>
+              </div>
+              <div class="info-list">
+                <div class="info-row"><span>当前学期</span><strong>2025-2026 第二学期</strong></div>
+                <div class="info-row"><span>平台名称</span><strong>学生信息管理平台</strong></div>
+                <div class="info-row"><span>校区</span><strong>主校区</strong></div>
+                <div class="info-row"><span>平均分</span><strong id="hero-average">0.0</strong></div>
+                <div class="info-row"><span>数据状态</span><strong id="dashboard-data-status">待加载</strong></div>
+                <div class="info-row"><span>同步时间</span><strong id="dashboard-update-time">--</strong></div>
+              </div>
+              <div class="mini-action-row" aria-label="常用操作">
+                <button class="btn btn-primary" id="dashboard-open-grades" type="button">成绩登记</button>
+                <button class="btn btn-soft" id="dashboard-open-transcript" type="button">学业档案</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="bento-grid dashboard-stat-grid">
+            <div class="stat-card" style="--accent: var(--primary);">
+              <div class="label">学生总数</div>
+              <div class="value" id="metric-students">0</div>
+            </div>
+            <div class="stat-card" style="--accent: var(--primary-2);">
+              <div class="label">课程总数</div>
+              <div class="value" id="metric-courses">0</div>
+            </div>
+            <div class="stat-card" style="--accent: var(--success);">
+              <div class="label">成绩记录</div>
+              <div class="value" id="metric-grades">0</div>
+            </div>
+            <div class="stat-card" style="--accent: var(--danger);">
+              <div class="label">不及格人次</div>
+              <div class="value" id="metric-failures">0</div>
+            </div>
+            <div class="stat-card" style="--accent: var(--warning);">
+              <div class="label">最近 7 天变更</div>
+              <div class="value" id="metric-activity">0</div>
+            </div>
+          </div>
+          <div class="split-grid dashboard-focus-grid">
+            <div class="card dashboard-panel">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">业务入口</div>
+                  <div class="card-subtitle">教务处常用模块</div>
+                </div>
+              </div>
+              <div class="service-grid">
+                <button class="service-link" id="entry-students" type="button">
+                  <strong>学籍档案</strong>
+                  <span>学生信息、学院专业、学籍状态</span>
+                </button>
+                <button class="service-link" id="entry-grades" type="button">
+                  <strong>成绩登记</strong>
+                  <span>录入、修改、导出、审计</span>
+                </button>
+                <button class="service-link" id="entry-transcript" type="button">
+                  <strong>学业档案</strong>
+                  <span>成绩单、学分、GPA</span>
+                </button>
+                <button class="service-link" id="entry-analysis" type="button">
+                  <strong>课程质量</strong>
+                  <span>均分、通过率、分布</span>
+                </button>
+                <button class="service-link" id="entry-database" type="button">
+                  <strong>数据字典</strong>
+                  <span>表、视图、过程、索引</span>
+                </button>
+                <button class="service-link" id="entry-logs" type="button">
+                  <strong>操作审计</strong>
+                  <span>成绩变更记录</span>
+                </button>
+              </div>
+            </div>
+            <div class="card dashboard-panel">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">待关注事项</div>
+                  <div class="card-subtitle">异常成绩、课程质量、近期变更</div>
+                </div>
+              </div>
+              <div class="dashboard-alert-list" id="dashboard-alerts"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">近期成绩记录</div>
+                <div class="card-subtitle">按更新时间排序</div>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <caption class="sr-only">最近录入或修改的成绩记录</caption>
+                <thead>
+                  <tr>
+                    <th class="cell-center">#</th>
+                    <th>学号</th>
+                    <th>姓名</th>
+                    <th>课程</th>
+                    <th class="cell-center">分数</th>
+                    <th class="cell-center">绩点</th>
+                    <th>更新时间</th>
+                  </tr>
+                </thead>
+                <tbody id="dashboard-recent"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="split-grid">
+            <div class="card chart-panel">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">成绩等级分布</div>
+                  <div class="card-subtitle">统计优秀、良好、中等、及格和不及格人数</div>
+                </div>
+              </div>
+              <div class="chart-box" id="chart-distribution"></div>
+            </div>
+            <div class="card chart-panel">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">课程均分对比</div>
+                  <div class="card-subtitle">对比各课程平均分、最高分和最低分</div>
+                </div>
+              </div>
+              <div class="chart-box" id="chart-course-overview"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="page active" id="page-students">
+
+          <div class="card">
+            <div class="filters">
+              <div class="field"><label for="student-filter-no">学号</label><input id="student-filter-no" type="text"
+                  placeholder="输入学号"></div>
+              <div class="field"><label for="student-filter-name">姓名</label><input id="student-filter-name" type="text"
+                  placeholder="输入姓名"></div>
+              <div class="field"><label for="student-filter-major">专业</label><select id="student-filter-major"></select>
+              </div>
+              <div class="field"><label for="student-filter-status">学籍状态</label><select id="student-filter-status">
+                  <option value="">全部状态</option>
+                  <option value="1">在读</option>
+                  <option value="2">休学</option>
+                  <option value="3">毕业</option>
+                </select></div>
+              <div class="filters-actions">
+                <div class="left"><button class="btn btn-primary" id="student-create" type="button">新增学生</button><button
+                    class="btn btn-danger" id="student-batch-delete" type="button">批量删除</button><button
+                    class="btn btn-soft" id="student-export" type="button">导出 CSV</button></div>
+                <div class="right"><button class="btn" id="student-reset" type="button">重置筛选</button></div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">学籍档案</div>
+                <div class="card-subtitle">当前筛选结果 <span id="students-count">0</span> 条</div>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <caption class="sr-only">学籍档案</caption>
+                <thead>
+                  <tr>
+                    <th class="cell-center"><input class="checkbox" id="student-check-all" type="checkbox"></th>
+                    <th class="cell-center">#</th>
+                    <th>学号</th>
+                    <th>姓名</th>
+                    <th>学院</th>
+                    <th>专业</th>
+                    <th class="cell-center">状态</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody id="students-body"></tbody>
+              </table>
+            </div>
+            <div class="pager"><span id="students-pager-info">共 0 条</span>
+              <div class="pager-buttons" id="students-pager"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="page" id="page-courses">
+
+          <div class="card">
+            <div class="filters">
+              <div class="field"><label for="course-filter-code">课程代码</label><input id="course-filter-code" type="text"
+                  placeholder="如 CS101"></div>
+              <div class="field"><label for="course-filter-name">课程名称</label><input id="course-filter-name" type="text"
+                  placeholder="输入课程名称"></div>
+              <div class="filters-actions">
+                <div class="left"><button class="btn btn-primary" id="course-create" type="button">新增课程</button></div>
+                <div class="right"><button class="btn" id="course-reset" type="button">重置筛选</button></div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">课程资源</div>
+                <div class="card-subtitle">按课程代码和课程名检索</div>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <caption class="sr-only">课程资源</caption>
+                <thead>
+                  <tr>
+                    <th class="cell-center">#</th>
+                    <th>课程代码</th>
+                    <th>课程名称</th>
+                    <th>任课教师</th>
+                    <th class="cell-center">学分</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody id="courses-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="page" id="page-grades">
+
+          <div class="card">
+            <div class="filters">
+              <div class="field"><label for="grade-filter-name">学生姓名</label><input id="grade-filter-name" type="text"
+                  placeholder="输入姓名"></div>
+              <div class="field"><label for="grade-filter-course">课程名称</label><input id="grade-filter-course"
+                  type="text" placeholder="输入课程"></div>
+              <div class="field"><label for="grade-filter-status">成绩状态</label><select id="grade-filter-status">
+                  <option value="">全部</option>
+                  <option value="pass">及格</option>
+                  <option value="fail">不及格</option>
+                </select></div>
+              <div class="filters-actions">
+                <div class="left"><button class="btn btn-primary" id="grade-create" type="button">录入成绩</button><button
+                    class="btn btn-soft" id="grade-export" type="button">导出 CSV</button></div>
+                <div class="right"><button class="btn" id="grade-reset" type="button">重置筛选</button></div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">成绩登记</div>
+                <div class="card-subtitle">共 <span id="grades-count">0</span> 条记录</div>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <caption class="sr-only">成绩记录列表</caption>
+                <thead>
+                  <tr>
+                    <th class="cell-center">#</th>
+                    <th>学号</th>
+                    <th>姓名</th>
+                    <th>课程</th>
+                    <th class="cell-center">学分</th>
+                    <th class="cell-center">分数</th>
+                    <th class="cell-center">绩点</th>
+                    <th class="cell-center">状态</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody id="grades-body"></tbody>
+              </table>
+            </div>
+            <div class="pager"><span id="grades-pager-info">共 0 条</span>
+              <div class="pager-buttons" id="grades-pager"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="page" id="page-transcript">
+
+          <div class="card">
+            <div class="filters">
+              <div class="field"><label for="transcript-student">选择学生</label><select id="transcript-student"></select>
+              </div>
+              <div class="filters-actions">
+                <div class="left"><button class="btn btn-primary" id="transcript-load" type="button">加载成绩单</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="mini-grid">
+            <div class="card summary-card"><strong>已修课程</strong><span
+                id="transcript-course-count">0</span><small>成绩单课程总数</small></div>
+            <div class="card summary-card"><strong>总学分</strong><span
+                id="transcript-credits">0</span><small>累计课程学分</small></div>
+            <div class="card summary-card"><strong>加权 GPA</strong><span
+                id="transcript-gpa">0.00</span><small>基于返回结果汇总</small></div>
+          </div>
+          <div class="split-grid">
+            <div class="card chart-panel">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">课程成绩走势</div>
+                  <div class="card-subtitle">分数与绩点的双轴展示</div>
+                </div>
+              </div>
+              <div class="chart-box" id="chart-transcript"></div>
+            </div>
+            <div class="card chart-panel">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">成绩单信息</div>
+                  <div class="card-subtitle">直接来自存储过程输出</div>
+                </div>
+              </div>
+              <div class="table-wrap compact">
+                <div class="inline-row"><span class="pill" id="transcript-student-meta">请选择学生</span><span class="pill"
+                    id="transcript-major-meta">专业信息待加载</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">成绩单明细</div>
+                <div class="card-subtitle">课程代码、名称、学分、分数、绩点和等级</div>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <caption class="sr-only">学生成绩单详情</caption>
+                <thead>
+                  <tr>
+                    <th class="cell-center">#</th>
+                    <th>课程代码</th>
+                    <th>课程名称</th>
+                    <th class="cell-center">学分</th>
+                    <th class="cell-center">分数</th>
+                    <th class="cell-center">绩点</th>
+                    <th class="cell-center">等级</th>
+                  </tr>
+                </thead>
+                <tbody id="transcript-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="page" id="page-analysis">
+
+          <div class="card">
+            <div class="filters">
+              <div class="field"><label for="analysis-course">选择课程</label><select id="analysis-course"></select></div>
+              <div class="filters-actions">
+                <div class="left"><button class="btn btn-primary" id="analysis-load" type="button">加载课程分析</button></div>
+              </div>
+            </div>
+          </div>
+          <div class="mini-grid">
+            <div class="card summary-card"><strong>选课人数</strong><span id="analysis-total">0</span><small>已有成绩人数</small>
+            </div>
+            <div class="card summary-card"><strong>平均分</strong><span id="analysis-average">0</span><small>课程均分</small>
+            </div>
+            <div class="card summary-card"><strong>通过率</strong><span
+                id="analysis-pass-rate">0%</span><small>及格成绩占比</small></div>
+          </div>
+          <div class="split-grid">
+            <div class="card chart-panel">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">成绩区间分布</div>
+                  <div class="card-subtitle">优秀到不及格分布</div>
+                </div>
+              </div>
+              <div class="chart-box" id="chart-analysis-buckets"></div>
+            </div>
+            <div class="card chart-panel">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">课程雷达图</div>
+                  <div class="card-subtitle">平均分、最高分、最低分与通过率</div>
+                </div>
+              </div>
+              <div class="chart-box" id="chart-analysis-radar"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">所有课程概览</div>
+                <div class="card-subtitle">从课程统计接口读取全局课程表现</div>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <caption class="sr-only">所有课程概览</caption>
+                <thead>
+                  <tr>
+                    <th class="cell-center">#</th>
+                    <th>课程代码</th>
+                    <th>课程名称</th>
+                    <th class="cell-center">平均分</th>
+                    <th class="cell-center">最高分</th>
+                    <th class="cell-center">最低分</th>
+                    <th class="cell-center">学生数</th>
+                  </tr>
+                </thead>
+                <tbody id="analysis-overview-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="page" id="page-gpa">
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">GPA 榜单</div>
+                <div class="card-subtitle">按加权 GPA 从高到低排列</div>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <caption class="sr-only">GPA 排行列表</caption>
+                <thead>
+                  <tr>
+                    <th class="cell-center">排名</th>
+                    <th>学号</th>
+                    <th>姓名</th>
+                    <th>专业</th>
+                    <th class="cell-center">课程数</th>
+                    <th class="cell-center">总学分</th>
+                    <th class="cell-center">加权 GPA</th>
+                  </tr>
+                </thead>
+                <tbody id="gpa-body"></tbody>
+              </table>
+            </div>
+            <div class="pager"><span id="gpa-pager-info">共 0 条</span>
+              <div class="pager-buttons" id="gpa-pager"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="page" id="page-database">
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">数据表</div>
+                  <div class="card-subtitle">表名与注释</div>
+                </div>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <caption class="sr-only">数据表列表</caption>
+                  <thead>
+                    <tr>
+                      <th>表名</th>
+                      <th>注释</th>
+                    </tr>
+                  </thead>
+                  <tbody id="db-tables-body"></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">触发器</div>
+                  <div class="card-subtitle">触发时机与目标表</div>
+                </div>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <caption class="sr-only">触发器列表</caption>
+                  <thead>
+                    <tr>
+                      <th>名称</th>
+                      <th>时机</th>
+                      <th>事件</th>
+                      <th>目标表</th>
+                    </tr>
+                  </thead>
+                  <tbody id="db-triggers-body"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">视图</div>
+                  <div class="card-subtitle">当前数据库视图</div>
+                </div>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <caption class="sr-only">视图列表</caption>
+                  <thead>
+                    <tr>
+                      <th>名称</th>
+                    </tr>
+                  </thead>
+                  <tbody id="db-views-body"></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">存储过程</div>
+                  <div class="card-subtitle">过程与类型</div>
+                </div>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <caption class="sr-only">存储过程列表</caption>
+                  <thead>
+                    <tr>
+                      <th>名称</th>
+                      <th>类型</th>
+                    </tr>
+                  </thead>
+                  <tbody id="db-procedures-body"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">索引</div>
+                <div class="card-subtitle">索引与唯一性</div>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <caption class="sr-only">索引列表</caption>
+                <thead>
+                  <tr>
+                    <th>表名</th>
+                    <th>索引名</th>
+                    <th>字段</th>
+                    <th class="cell-center">唯一</th>
+                  </tr>
+                </thead>
+                <tbody id="db-indexes-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="page" id="page-logs">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">成绩变更日志</div>
+                <div class="card-subtitle">最近 50 条成绩审计记录</div>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <caption class="sr-only">成绩变更审计日志</caption>
+                <thead>
+                  <tr>
+                    <th class="cell-center">#</th>
+                    <th>学生</th>
+                    <th>课程</th>
+                    <th class="cell-center">操作</th>
+                    <th class="cell-center">原分数</th>
+                    <th class="cell-center">新分数</th>
+                    <th>时间</th>
+                  </tr>
+                </thead>
+                <tbody id="logs-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-mask" id="modal-mask">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal-head">
+        <div class="modal-title" id="modal-title">标题</div>
+        <button class="btn" id="modal-close" type="button">关闭</button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+      <div class="modal-foot" id="modal-foot"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">
+    <div class="toast-icon" id="toast-icon"></div>
+    <div class="toast-text"><strong id="toast-title">操作成功</strong><span id="toast-message">提示内容</span></div>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+
+</html>

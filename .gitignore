@@ -1,0 +1,56 @@
+﻿# dependencies
+node_modules/
+venv/
+.venv/
+
+# environment and secrets
+.env
+.env.*
+*.pem
+*.p12
+*.pfx
+*.key
+*.crt
+
+# runtime caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.cache/
+.DS_Store
+Thumbs.db
+
+# build outputs
+build/
+dist/
+out/
+target/
+*.log
+logs/
+
+# local databases and binary runtime state
+*.db
+*.sqlite
+*.sqlite3
+*.mdb
+*.accdb
+
+# browser/test profiles
+.chrome*/
+playwright-report/
+test-results/
+
+# local IDE state
+.vscode/
+.idea/
+
+# archive/package artifacts
+*.tgz
+*.zip
+*.rar
+*.7z
+
+# project-specific local/runtime data
+腾讯会议/
+Tencent Games/
+tmp/
